@@ -12,7 +12,7 @@ filesets:
     depend:
       - lowrisc:dv:cip_lib
       - lowrisc:dv:csr_utils
-      - lowrisc:dv:aes_model_dpi
+#      - lowrisc:dv:aes_model_dpi
       - lowrisc:dv:gen_ral_pkg
     files:
       - aes_env_pkg.sv
