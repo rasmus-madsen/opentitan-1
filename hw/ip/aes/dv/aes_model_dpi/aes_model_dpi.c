@@ -7,7 +7,7 @@
 #include <cstring>
 
 #include "aes.h"
-#include "crypto.h"
+//#include "crypto.h"
 #include "svdpi.h"
 
 #include "aes_model_dpi.h"
@@ -56,27 +56,29 @@ void aes_crypt_dpi(const unsigned char impl_i, const unsigned char mode_i,
 
     // always do an encrypt first as crypto_decrypt() requires
     // the final spare block produced by crypto_encrypt()
-    int len = crypto_encrypt(ref_out, iv, ref_in, 16, key, key_len);
+    /* RMN COMMENT BACK IN WHEN OPEN SSL */
+    // int len = crypto_encrypt(ref_out, iv, ref_in, 16, key, key_len);
 
-    if (mode_i) {
-      // prepare
-      unsigned char *ref_in_crypto =
-          (unsigned char *)malloc(num_elem_ref_out * sizeof(unsigned char));
-      if (!ref_in_crypto) {
-        printf("ERROR: malloc() for aes_crypt_dpi failed");
-        return;
-      }
-      memcpy((void *)&ref_in_crypto[0], (const void *)&ref_in[0],
-             (size_t)(len - 16));
-      memcpy((void *)&ref_in_crypto[len - 16], (const void *)&ref_out[len - 16],
-             (size_t)16);
-
-      // do the decrypt
-      crypto_decrypt(ref_out, iv, ref_in_crypto, len, key, key_len);
-
-      // cleanup
-      free(ref_in_crypto);
-    }
+    //if (mode_i) {
+    //  // prepare
+    //  unsigned char *ref_in_crypto =
+    //      (unsigned char *)malloc(num_elem_ref_out * sizeof(unsigned char));
+    //  if (!ref_in_crypto) {
+    //    printf("ERROR: malloc() for aes_crypt_dpi failed");
+    //    return;
+    //  }
+    //  memcpy((void *)&ref_in_crypto[0], (const void *)&ref_in[0],
+    //         (size_t)(len - 16));
+    //  memcpy((void *)&ref_in_crypto[len - 16], (const void *)&ref_out[len - 16],
+    //         (size_t)16);
+    //
+    //  // do the decrypt
+    //  crypto_decrypt(ref_out, iv, ref_in_crypto, len, key, key_len);
+    //
+    //  // cleanup
+    //  free(ref_in_crypto);
+    //}
+    /* RMN COMMENT */
   }
 
   // write output data back to simulator
