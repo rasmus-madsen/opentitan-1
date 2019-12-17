@@ -13,7 +13,7 @@ package aes_env_pkg;
   import cip_base_pkg::*;
   import aes_reg_pkg::*;  
   import aes_ral_pkg::*;
-  
+  import aes_seq_item_pkg::*;
   // macro includes
   `include "uvm_macros.svh"
   `include "dv_macros.svh"
@@ -29,10 +29,10 @@ package aes_env_pkg;
   // functions
 
   // package sources
-// `include "aes_reg_block.sv"
+  // `include "aes_reg_block.sv"
  `include "aes_env_cfg.sv"
  `include "aes_env_cov.sv"
- `include "aes_virtual_sequencer.sv"  
+ `include "aes_virtual_sequencer.sv"
  `include "aes_scoreboard.sv"
  `include "aes_env.sv"
  `include "aes_vseq_list.sv"

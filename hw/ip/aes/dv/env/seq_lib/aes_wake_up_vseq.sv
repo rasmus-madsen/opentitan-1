@@ -9,9 +9,11 @@ class aes_wake_up_vseq extends aes_base_vseq;
 
   `uvm_object_new
 
-  logic [127:0] plain_text   = 128'hDEADBEEFEEDDBBAABAADBEEFDEAFBEAD;
-  logic [255:0] init_key     = 256'h0000111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFF;
-  logic [127:0] cypher_text, decrypted_text;
+  bit [31:0]  plain_text[$]   = {32'hDEADBEEF, 32'hEEDDBBAA, 32'hBAADBEEF, 32'hDEAFBEAD};
+  logic [255:0] init_key        = 256'h0000111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFF;
+  bit [31:0]  cypher_text[$];
+  logic [31:0]  decrypted_text[$];
+  logic [127:0] read_text;
 
   task body();
     
@@ -34,11 +36,13 @@ class aes_wake_up_vseq extends aes_base_vseq;
     cfg.clk_rst_vif.wait_clks(20);
     // poll status register
     `uvm_info(`gfn, $sformatf("\n\t ---| Polling for data register %s", ral.status.convert2string()), UVM_DEBUG)
-    read_data(cypher_text);
+    read_data(read_text);
+    cypher_text = { read_text[127:96], read_text[95:64], read_text[63:32], read_text[31:0]};
+    
     `uvm_info(`gfn, $sformatf("\n\t ---|cypher text : %02h", cypher_text), UVM_DEBUG)
 
     // read output    
-    `uvm_info(`gfn, $sformatf("\n\t ------|WAIT 0 |-------"), UVM_LOW)
+    `uvm_info(`gfn, $sformatf("\n\t ------|WAIT 0 |-------"), UVM_DEBUG)
     cfg.clk_rst_vif.wait_clks(20);
 
     // set aes to decrypt
@@ -50,15 +54,17 @@ class aes_wake_up_vseq extends aes_base_vseq;
     `uvm_info(`gfn, $sformatf("\n\t ---| WRITING CYPHER TEXT %02h", cypher_text), UVM_DEBUG)
     add_data(cypher_text);
     `uvm_info(`gfn, $sformatf("\n\t ---| Polling for data %s", ral.status.convert2string()), UVM_DEBUG)
-    read_data(decrypted_text);
+    read_data(read_text);
+    decrypted_text = { read_text[127:96], read_text[95:64], read_text[63:32], read_text[31:0]};  
 
-    if(decrypted_text == plain_text) begin
-      `uvm_info(`gfn, $sformatf(" \n\t ---| YAY TEST PASSED |--- \n \t DECRYPTED: \t %02h \n\t Plaintext: \t %02h ", decrypted_text, plain_text), UVM_NONE)
-    end else begin
-      `uvm_fatal(`gfn, $sformatf(" \n\t ---| NOO TEST FAILED |--- \n \t DECRYPTED: \t %02h \n\t Plaintext: \t %02h ", decrypted_text, plain_text))
+    plain_text = {32'hDEADBEEF, 32'hEEDDBBAA, 32'hBAADBEEF, 32'hDEAFBEAD};
+    foreach(plain_text[i]) begin
+      if(plain_text[i] != decrypted_text[i]) begin  
+        `uvm_fatal(`gfn, $sformatf(" \n\t ---| OH NOO TEST FAILED AT POS %d|--- \n \t DECRYPTED: \t %02h \n\t Plaintext: \t %02h ",i, decrypted_text[i], plain_text[i]))
+      end 
+      
     end    
-    
-    `uvm_info(`gfn, $sformatf("DATA ADDED "), UVM_DEBUG)
+    `uvm_info(`gfn, $sformatf(" \n\t ---| YAY TEST PASSED |--- \n \t "), UVM_NONE)    
   endtask : body
 endclass : aes_wake_up_vseq
 

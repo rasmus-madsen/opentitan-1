@@ -15,9 +15,10 @@ filesets:
       - lowrisc:dv:gen_ral_pkg
       - lowrisc:dv:aes_model_dpi      
     files:
+      - aes_seq_item_pkg.sv    
       - aes_env_pkg.sv
       - aes_virtual_sequencer.sv: {is_include_file: true}      
-      - aes_env_cfg.sv: {is_include_file: true}
+      - aes_env_cfg.sv: {is_include_file: true}      
       - aes_env_cov.sv: {is_include_file: true}
       - aes_env.sv: {is_include_file: true}
       - aes_reg_block.sv: {is_include_file: true}
