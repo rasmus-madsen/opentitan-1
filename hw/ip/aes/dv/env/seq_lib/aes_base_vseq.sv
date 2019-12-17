@@ -1,7 +1,7 @@
 // Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
-
+import aes_seq_item_pkg::*;
 
 class aes_base_vseq extends cip_base_vseq #(
   .CFG_T               (aes_env_cfg),
@@ -16,6 +16,7 @@ class aes_base_vseq extends cip_base_vseq #(
   parameter DECRYPT = 1'b1;
   
   aes_reg2hw_t aes_reg;
+  aes_seq_item  aes_item;  
 
   // various knobs to enable certain routines
   bit do_aes_init = 1'b1;
@@ -62,15 +63,11 @@ class aes_base_vseq extends cip_base_vseq #(
     csr_wr(.csr(ral.key7), .value(key[7]));         
   endtask  
 
-  virtual task add_data(logic [127:0] data);
-    `uvm_info(`gfn, $sformatf("\n\t ---| Write data word 0: %02h", data[31:0]), UVM_DEBUG)
-    csr_wr(.csr(ral.data_in0), .value(data[31:0]));
-    `uvm_info(`gfn, $sformatf("\n\t ---| Write data word 1: %02h", data[63:32]), UVM_DEBUG)
-    csr_wr(.csr(ral.data_in1), .value(data[63:32]));
-    `uvm_info(`gfn, $sformatf("\n\t ---| Write data word 2: %02h", data[95:64]), UVM_DEBUG)
-    csr_wr(.csr(ral.data_in2), .value(data[95:64]));
-    `uvm_info(`gfn, $sformatf("\n\t ---| Write data word 0: %02h", data[127:96]), UVM_DEBUG)
-    csr_wr(.csr(ral.data_in3), .value(data[127:96]));    
+  virtual task add_data(ref bit [31:0] data[$]);  
+    csr_wr(.csr(ral.data_in0), .value(data.pop_back()) );
+    csr_wr(.csr(ral.data_in1), .value(data.pop_back()) );
+    csr_wr(.csr(ral.data_in2), .value(data.pop_back()) );
+    csr_wr(.csr(ral.data_in3), .value(data.pop_back()) );    
   endtask
 
   virtual task read_data(output logic [127:0] cypher_txt);
