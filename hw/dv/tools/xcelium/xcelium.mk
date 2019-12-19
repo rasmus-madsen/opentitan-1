@@ -27,6 +27,7 @@ BUILD_OPTS  += -timescale 1ns/1ps
 BUILD_OPTS  += -uvmhome ${UVM_HOME}
 BUILD_OPTS  += -xmlibdirname ${SV_FLIST_GEN_DIR}/xcelium.d
 BUILD_OPTS  += -f ${SV_FLIST}
+BUILD_OPTS  += -64b
 
 # set standard run options
 RUN_OPTS    += -input ${SIM_SETUP}
@@ -35,6 +36,7 @@ RUN_OPTS    += +UVM_VERBOSITY=${UVM_VERBOSITY}
 RUN_OPTS    += +UVM_TESTNAME=${UVM_TEST}
 RUN_OPTS    += +UVM_TEST_SEQ=${UVM_TEST_SEQ}
 RUN_OPTS    += -l ${RUN_LOG}
+RUN_OPTS    += -64bit
 RUN_OPTS    += -xmlibdirname ${SV_FLIST_GEN_DIR}/xcelium.d -R
 
 #########################
