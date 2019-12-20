@@ -44,47 +44,61 @@ class aes_base_vseq extends cip_base_vseq #(
     csr_wr(.csr(ral.ctrl), .value(aes_ctrl));       
   endtask
 
-  virtual      task set_mode(bit mode);
-    bit [31:0] read_val;
-
+  virtual task set_mode(bit mode);
     ral.ctrl.mode.set(mode);
-    csr_update(.csr(ral.ctrl));
-    
+    csr_update(.csr(ral.ctrl));   
   endtask
+
+  virtual task set_key_len(bit [2:0] key_len);
+    ral.ctrl.key_len.set(key_len);
+    csr_update(.csr(ral.ctrl));   
+  endtask
+
+  virtual task set_trigger(bit trigger);
+    ral.ctrl.manual_start_trigger.set(trigger);
+    csr_update(.csr(ral.ctrl));   
+  endtask
+
+  virtual task set_force_overwrite(bit f_ovrwrt);
+    ral.ctrl.force_data_overwrite.set(f_ovrwrt);
+    csr_update(.csr(ral.ctrl));   
+  endtask
+
   
-  virtual task write_key(aes_reg2hw_key_mreg_t [7:0] key);
-    csr_wr(.csr(ral.key0), .value(key[0]));
-    csr_wr(.csr(ral.key1), .value(key[1]));
-    csr_wr(.csr(ral.key2), .value(key[2]));
-    csr_wr(.csr(ral.key3), .value(key[3]));
-    csr_wr(.csr(ral.key4), .value(key[4]));
-    csr_wr(.csr(ral.key5), .value(key[5]));
-    csr_wr(.csr(ral.key6), .value(key[6]));
-    csr_wr(.csr(ral.key7), .value(key[7]));         
+  virtual task write_key(aes_reg2hw_key_mreg_t [7:0] key);    
+    csr_wr(.csr(ral.key0), .value(key[0].q));
+    csr_wr(.csr(ral.key1), .value(key[1].q));
+    csr_wr(.csr(ral.key2), .value(key[2].q));
+    csr_wr(.csr(ral.key3), .value(key[3].q));
+    csr_wr(.csr(ral.key4), .value(key[4].q));
+    csr_wr(.csr(ral.key5), .value(key[5].q));
+    csr_wr(.csr(ral.key6), .value(key[6].q));
+    csr_wr(.csr(ral.key7), .value(key[7].q));         
   endtask  
 
   virtual task add_data(ref bit [31:0] data[$]);  
     csr_wr(.csr(ral.data_in0), .value(data.pop_back()) );
     csr_wr(.csr(ral.data_in1), .value(data.pop_back()) );
     csr_wr(.csr(ral.data_in2), .value(data.pop_back()) );
-    csr_wr(.csr(ral.data_in3), .value(data.pop_back()) );    
+    csr_wr(.csr(ral.data_in3), .value(data.pop_back()) );
+
   endtask
 
-  virtual task read_data(output logic [127:0] cypher_txt);
+  virtual task read_data(ref bit [31:0] cypher_txt[$]);
     bit data_rdy = 0;
-    bit [31:0] rd_data;
+    bit [31:0]       rd_data;
+    
     csr_spinwait(.ptr(ral.status.output_valid) , .exp_data(1'b1));    // poll for data valid
-    csr_rd(.ptr(ral.data_out3), .value(rd_data));
-    cypher_txt[127:96] = rd_data;
-    `uvm_info(`gfn, $sformatf("\n\t ---| Read encrypted text from dataout3 %02h", rd_data), UVM_DEBUG)
-    csr_rd(.ptr(ral.data_out2), .value(rd_data));
-    cypher_txt[95:64] = rd_data;
-    `uvm_info(`gfn, $sformatf("\n\t ---| Read encrypted text dataout2 %02h", rd_data), UVM_DEBUG)
-    csr_rd(.ptr(ral.data_out1), .value(rd_data));
-    cypher_txt[63:32] = rd_data;
-    `uvm_info(`gfn, $sformatf("\n\t ---| Read encrypted text dataout1 %02h", rd_data), UVM_DEBUG)
     csr_rd(.ptr(ral.data_out0), .value(rd_data));
-    cypher_txt[31:0] = rd_data;
-    `uvm_info(`gfn, $sformatf("\n\t ---| Read encrypted text dataout0 %02h", rd_data), UVM_DEBUG)
+    cypher_txt.push_front(rd_data);
+    
+    csr_rd(.ptr(ral.data_out1), .value(rd_data));
+    cypher_txt.push_front(rd_data);
+    
+    csr_rd(.ptr(ral.data_out2), .value(rd_data));
+    cypher_txt.push_front(rd_data);
+    
+    csr_rd(.ptr(ral.data_out3), .value(rd_data));
+    cypher_txt.push_front(rd_data);    
   endtask
 endclass : aes_base_vseq

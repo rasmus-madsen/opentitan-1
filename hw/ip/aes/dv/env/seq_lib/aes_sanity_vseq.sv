@@ -18,13 +18,15 @@
     aes_item = new();
     void'(aes_item.randomize());
 
-    set_mode(ENCRYPT);
+    set_mode(aes_item.mode);
     // add key
-    //write_key(aes_item.key);
+    write_key(aes_item.key);
 
     // add data
-    add_data(aes_item.data_queue);
+    add_data(aes_item.data_in_queue);
     // get cypher
+    read_data(aes_item.data_out_queue);
+    
 
     // set decrypt
 
