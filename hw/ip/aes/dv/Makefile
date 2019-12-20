@@ -36,7 +36,7 @@ ifeq (${TEST_NAME},aes_wakeup_test)
   UVM_TEST_SEQ   = aes_wake_up_vseq
 endif
 
-ifeq (${TEST_NAME},aes_sanity)
+ifeq (${TEST_NAME},aes_sanity_test)
   UVM_TEST_SEQ   = aes_sanity_vseq
 endif
 

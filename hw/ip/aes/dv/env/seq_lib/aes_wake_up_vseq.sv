@@ -10,52 +10,67 @@ class aes_wake_up_vseq extends aes_base_vseq;
   `uvm_object_new
 
   bit [31:0]  plain_text[$]   = {32'hDEADBEEF, 32'hEEDDBBAA, 32'hBAADBEEF, 32'hDEAFBEAD};
-  logic [255:0] init_key        = 256'h0000111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFF;
+  logic [255:0] plain_key        = 256'h0000111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFF;
   bit [31:0]  cypher_text[$];
-  logic [31:0]  decrypted_text[$];
-  logic [127:0] read_text;
+  bit [31:0]  decrypted_text[$];
+  logic [31:0] read_text[$];
 
+  aes_reg2hw_key_mreg_t [7:0] init_key;
+ 
+  
+  
   task body();
+      
     
-    `uvm_info(`gfn, $sformatf("STARTING AES SEQUENCE"), UVM_DEBUG)
+    `uvm_info(`gfn, $sformatf("STARTING AES SEQUENCE"), UVM_LOW)
     `DV_CHECK_RANDOMIZE_FATAL(this)
-    `uvm_info(`gfn, $sformatf("running aes sanity sequence"), UVM_DEBUG)
+    `uvm_info(`gfn, $sformatf("running aes sanity sequence"), UVM_LOW)
 
-    `uvm_info(`gfn, $sformatf(" \n\t ---|setting mode to encrypt"), UVM_DEBUG)
+    `uvm_info(`gfn, $sformatf(" \n\t ---|setting mode to encrypt"), UVM_LOW)
     // set mode to encrypt
     set_mode(ENCRYPT);    
     
-    `uvm_info(`gfn, $sformatf(" \n\t ---| WRITING INIT KEY"), UVM_DEBUG)
+    `uvm_info(`gfn, $sformatf(" \n\t ---| WRITING INIT KEY  %02h", init_key), UVM_LOW)
     // add init key
+    foreach (init_key[i]) begin
+      init_key[i].q = plain_key[i*32+31 -:32];
+    end
     write_key(init_key);    
     cfg.clk_rst_vif.wait_clks(20);
     
-    `uvm_info(`gfn, $sformatf(" \n\t ---| ADDING PLAIN TEXT"), UVM_DEBUG)
+    `uvm_info(`gfn, $sformatf(" \n\t ---| ADDING PLAIN TEXT"), UVM_LOW)
     add_data(plain_text);
     
     cfg.clk_rst_vif.wait_clks(20);
     // poll status register
-    `uvm_info(`gfn, $sformatf("\n\t ---| Polling for data register %s", ral.status.convert2string()), UVM_DEBUG)
-    read_data(read_text);
-    cypher_text = { read_text[127:96], read_text[95:64], read_text[63:32], read_text[31:0]};
-    
-    `uvm_info(`gfn, $sformatf("\n\t ---|cypher text : %02h", cypher_text), UVM_DEBUG)
+    `uvm_info(`gfn, $sformatf("\n\t ---| Polling for data register %s", ral.status.convert2string()), UVM_LOW)
 
+    read_data(cypher_text);
+    
+    foreach(cypher_text[i]) begin
+      `uvm_info(`gfn, $sformatf("\n\t ----| Cypher text elememt [%d] : %02h", i, cypher_text[i]), UVM_LOW)
+    end
+    
+   
     // read output    
-    `uvm_info(`gfn, $sformatf("\n\t ------|WAIT 0 |-------"), UVM_DEBUG)
+    `uvm_info(`gfn, $sformatf("\n\t ------|WAIT 0 |-------"), UVM_LOW)
     cfg.clk_rst_vif.wait_clks(20);
 
     // set aes to decrypt
     set_mode(DECRYPT);
-
-    `uvm_info(`gfn, $sformatf("\n\t ---|WRITING INIT KEY FOR DECRYPT: %02h", init_key), UVM_DEBUG)
+   cfg.clk_rst_vif.wait_clks(20);
+    `uvm_info(`gfn, $sformatf("\n\t ---|WRITING INIT KEY FOR DECRYPT: %02h", init_key), UVM_LOW)
     write_key(init_key);
-
-    `uvm_info(`gfn, $sformatf("\n\t ---| WRITING CYPHER TEXT %02h", cypher_text), UVM_DEBUG)
+    cfg.clk_rst_vif.wait_clks(20);
+    `uvm_info(`gfn, $sformatf("\n\t ---| WRITING CYPHER TEXT"), UVM_LOW)
     add_data(cypher_text);
-    `uvm_info(`gfn, $sformatf("\n\t ---| Polling for data %s", ral.status.convert2string()), UVM_DEBUG)
-    read_data(read_text);
-    decrypted_text = { read_text[127:96], read_text[95:64], read_text[63:32], read_text[31:0]};  
+    `uvm_info(`gfn, $sformatf("\n\t ---| Polling for data %s", ral.status.convert2string()), UVM_LOW)
+    cfg.clk_rst_vif.wait_clks(20);
+    read_data(decrypted_text);
+    foreach(decrypted_text[i]) begin
+      `uvm_info(`gfn, $sformatf("\n\t ----| decrypted text elememt [%d] : %02h", i, decrypted_text[i]), UVM_LOW)
+    end
+
 
     plain_text = {32'hDEADBEEF, 32'hEEDDBBAA, 32'hBAADBEEF, 32'hDEAFBEAD};
     foreach(plain_text[i]) begin
