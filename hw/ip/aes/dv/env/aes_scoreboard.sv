@@ -40,7 +40,7 @@ class aes_scoreboard extends cip_base_scoreboard #(
   task run_phase(uvm_phase phase);
     super.run_phase(phase);
      fork
-      compare();  
+     // compare();  
     join_none
   endtask
 
@@ -139,6 +139,7 @@ class aes_scoreboard extends cip_base_scoreboard #(
           dut_item.data_vld[3] = 1;          
           if(!dut_item.man_trigger&& (& dut_item.data_vld)) begin
             $cast(ref_item, dut_item.clone());
+            `uvm_info(`gfn, $sformatf("\t\n ----| ADDING TO REF FIFO"), UVM_LOW)
             ref_fifo.put(ref_item);
           end
         end
@@ -170,6 +171,7 @@ class aes_scoreboard extends cip_base_scoreboard #(
       
 
       // On reads, if do_read_check, is set, then check mirrored_value against item.d_data
+      `uvm_info(`gfn, $sformatf("\n\t ---| channel  %h", channel), UVM_LOW)
       if (!write && channel == DataChannel) begin
         if (do_read_check) begin
           `DV_CHECK_EQ(csr.get_mirrored_value(), item.d_data,
@@ -189,7 +191,8 @@ class aes_scoreboard extends cip_base_scoreboard #(
             dut_item.data_in[2] =   item.d_data;
           end
           "data_out3": begin
-            dut_item.data_in[3] =   item.d_data;  
+            dut_item.data_in[3] =   item.d_data;
+            `uvm_info(`gfn, $sformatf("\n\t ----| ADDING TO DUT FIFO"), UVM_LOW)
             dut_fifo.put(dut_item);
           end
           
@@ -201,12 +204,13 @@ class aes_scoreboard extends cip_base_scoreboard #(
 
 
   virtual task compare();
+    process_objections(1'b1);      
     forever begin
       aes_seq_item rtl_item;
       aes_seq_item c_item;
       bit [127:0] calc_data;
 
-      
+      `uvm_info(`gfn, $sformatf("\n\t ----| TRYING to get iten "), UVM_LOW)
       dut_fifo.get(rtl_item);
       ref_fifo.get(c_item );
 
@@ -220,7 +224,7 @@ class aes_scoreboard extends cip_base_scoreboard #(
       foreach(rtl_item.data_out[i]) begin
         `uvm_info(`gfn, $sformatf("\n\t ----| [%d] \t %02h \t %02h |----", i, rtl_item.data_out[i], c_item.data_out[i]), UVM_LOW)    
       end
-      
+      process_objections(1'b0);  
     end
     
   endtask

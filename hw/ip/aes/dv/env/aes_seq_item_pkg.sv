@@ -27,10 +27,10 @@ package aes_seq_item_pkg;
 
 
     // fixed variables //
-    bit                         [3:0]       data_vld = 4'b0;                      // indicated which words has data
-    bit                   [3:0][31:0]       data_in;                       // used by the checker 
-    bit                   [3:0][31:0]       data_out;                      // used by the checker
-    bit                        [31:0]       data_out_queue[$];             // used to store output data
+    bit                         [3:0]       data_vld = 4'b0;                // indicated which words has data
+    bit                   [3:0][31:0]       data_in;                        // used by the checker 
+    bit                   [3:0][31:0]       data_out;                       // used by the checker
+    bit                        [31:0]       data_out_queue[$];              // used to store output data
 
     function new( string name="aes_sequence_item");
       super.new(name);

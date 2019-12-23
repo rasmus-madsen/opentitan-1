@@ -87,7 +87,7 @@ class aes_base_vseq extends cip_base_vseq #(
   virtual task read_data(ref bit [31:0] cypher_txt[$]);
     bit data_rdy = 0;
     bit [31:0]       rd_data;
-    
+    `uvm_info(`gfn, $sformatf("\n\t ----| POLLING FOR DATA"), UVM_LOW)
     csr_spinwait(.ptr(ral.status.output_valid) , .exp_data(1'b1));    // poll for data valid
     csr_rd(.ptr(ral.data_out0), .value(rd_data));
     cypher_txt.push_front(rd_data);
@@ -99,6 +99,8 @@ class aes_base_vseq extends cip_base_vseq #(
     cypher_txt.push_front(rd_data);
     
     csr_rd(.ptr(ral.data_out3), .value(rd_data));
-    cypher_txt.push_front(rd_data);    
+    cypher_txt.push_front(rd_data);
+
+    `uvm_info(`gfn, $sformatf("\n\t ----| READ DATA"), UVM_LOW)
   endtask
 endclass : aes_base_vseq
