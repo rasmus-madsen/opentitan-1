@@ -26,8 +26,10 @@ BUILD_OPTS  += -sv
 BUILD_OPTS  += -timescale 1ns/1ps
 BUILD_OPTS  += -uvmhome ${UVM_HOME}
 BUILD_OPTS  += -xmlibdirname ${SV_FLIST_GEN_DIR}/xcelium.d
+#BUILD_OPTS  += -dpiimpheader
 BUILD_OPTS  += -f ${SV_FLIST}
-BUILD_OPTS  += -64b
+BUILD_OPTS  += -64bit
+#BUILD_OPTS += -sv_lib ./scratch/aes/default/simv.csrc/
 
 # set standard run options
 RUN_OPTS    += -input ${SIM_SETUP}
@@ -37,6 +39,7 @@ RUN_OPTS    += +UVM_TESTNAME=${UVM_TEST}
 RUN_OPTS    += +UVM_TEST_SEQ=${UVM_TEST_SEQ}
 RUN_OPTS    += -l ${RUN_LOG}
 RUN_OPTS    += -64bit
+#RUN_OPTS    +=  -dpiimpheader #sv_lib ./scratch/aes/default/simv.csrc/
 RUN_OPTS    += -xmlibdirname ${SV_FLIST_GEN_DIR}/xcelium.d -R
 
 #########################

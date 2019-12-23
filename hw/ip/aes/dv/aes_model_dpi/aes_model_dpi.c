@@ -4,9 +4,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <cstring>
+#include <string.h>
 
-#include "aes.h"
+#include "/wdc/proj/cto/top/work/rasmus.madsen/opentitan_new/hw/ip/aes/model/aes.h"
 //#include "crypto.h"
 #include "svdpi.h"
 
