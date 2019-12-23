@@ -39,7 +39,8 @@ class aes_scoreboard extends cip_base_scoreboard #(
 
   task run_phase(uvm_phase phase);
     super.run_phase(phase);
-    fork
+     fork
+      compare();  
     join_none
   endtask
 
@@ -106,13 +107,37 @@ class aes_scoreboard extends cip_base_scoreboard #(
           `uvm_info(`gfn, $sformatf("\n\t ----| SAW WRITE REGISTER %s TO addr %h of data %02h",csr.get_name(), item.a_addr, item.a_data), UVM_LOW)           
         end
 
-        "data_in0", "data_in1", "data_in2" :begin
-          dut_item.data_in_queue.push_front(item.a_data);   
+        "data_in0" :begin
+          dut_item.data_in[0] = item.a_data;
+          dut_item.data_vld[0] = 1;
+          if(!dut_item.man_trigger && (& dut_item.data_vld)) begin
+            $cast(ref_item, dut_item.clone());
+            ref_fifo.put(ref_item);
+          end
+        end
+
+        "data_in1" :begin
+          dut_item.data_in[1] = item.a_data;
+          dut_item.data_vld[1] = 1;
+          if(!dut_item.man_trigger && (& dut_item.data_vld)) begin
+            $cast(ref_item, dut_item.clone());
+            ref_fifo.put(ref_item);
+          end
+        end
+
+        "data_in2" :begin
+          dut_item.data_in[2] = item.a_data;
+          dut_item.data_vld[2] = 1;          
+          if(!dut_item.man_trigger && (& dut_item.data_vld)) begin
+            $cast(ref_item, dut_item.clone());
+            ref_fifo.put(ref_item);
+          end
         end
         
         "data_in3": begin
-          dut_item.data_in_queue.push_front(item.a_data);
-          if(!dut_item.man_trigger) begin
+          dut_item.data_in[3] = item.a_data;
+          dut_item.data_vld[3] = 1;          
+          if(!dut_item.man_trigger&& (& dut_item.data_vld)) begin
             $cast(ref_item, dut_item.clone());
             ref_fifo.put(ref_item);
           end
@@ -155,16 +180,16 @@ class aes_scoreboard extends cip_base_scoreboard #(
 
         case (csr.get_name())
           "data_out0": begin
-            dut_item.data_out_queue.push_front(item.d_data); 
+           dut_item.data_in[0] =   item.d_data;
           end
           "data_out1": begin
-            dut_item.data_out_queue.push_front(item.d_data); 
+            dut_item.data_in[1] =   item.d_data;
           end
           "data_out2": begin
-            dut_item.data_out_queue.push_front(item.d_data); 
+            dut_item.data_in[2] =   item.d_data;
           end
           "data_out3": begin
-            dut_item.data_out_queue.push_front(item.d_data);
+            dut_item.data_in[3] =   item.d_data;  
             dut_fifo.put(dut_item);
           end
           
@@ -176,23 +201,27 @@ class aes_scoreboard extends cip_base_scoreboard #(
 
 
   virtual task compare();
-    aes_seq_item rtl_item;
-    aes_seq_item c_item;
+    forever begin
+      aes_seq_item rtl_item;
+      aes_seq_item c_item;
+      bit [127:0] calc_data;
 
-    dut_fifo.get(rtl_item);
-    ref_fifo.get(c_item );
+      
+      dut_fifo.get(rtl_item);
+      ref_fifo.get(c_item );
 
-    bit [127:0] calc_data;
 
-    ------> chance data to input data and output data both 128 bits for easier access
 
-    aes_crypt_dpi( 1'b0, rtl_item.mode. rtl_item.key_size, rtl_item.key, 
+      
 
-    `uvm_info(`gfn, $sformatf("\n\t ----|   DATA OUTPUT \t\t  |----"), UVM_LOW)
-    foreach(rtl_item.data_out_queue[i]) begin
-      `uvm_info(`gfn, $sformatf("\n\t ----| [%d] \t %02h \t %02h |----", i, rtl_item.data_out_queue[i], c_item.data_out_queue[i]), UVM_LOW)    
+      aes_crypt_dpi( 1'b0, rtl_item.mode, rtl_item.key_size, rtl_item.key, rtl_item.data_in, rtl_item.data_out);
+
+      `uvm_info(`gfn, $sformatf("\n\t ----|   DATA OUTPUT \t\t  |----"), UVM_LOW)
+      foreach(rtl_item.data_out[i]) begin
+        `uvm_info(`gfn, $sformatf("\n\t ----| [%d] \t %02h \t %02h |----", i, rtl_item.data_out[i], c_item.data_out[i]), UVM_LOW)    
+      end
+      
     end
-    
     
   endtask
   
