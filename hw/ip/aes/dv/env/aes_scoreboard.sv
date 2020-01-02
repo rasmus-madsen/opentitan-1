@@ -39,8 +39,8 @@ class aes_scoreboard extends cip_base_scoreboard #(
 
   task run_phase(uvm_phase phase);
     super.run_phase(phase);
-     fork
-     // compare();  
+    fork
+      compare();  
     join_none
   endtask
 
@@ -155,51 +155,48 @@ class aes_scoreboard extends cip_base_scoreboard #(
         end
         
         
-        
-        
-
         default: begin
          // DO nothing- trying to write to a read only register
 
         end
       endcase
-
-
-      // process the csr req
-      // for write, update local variable and fifo at address phase
-      // for read, update predication at address phase and compare at data phase
-      
-
-      // On reads, if do_read_check, is set, then check mirrored_value against item.d_data
-      `uvm_info(`gfn, $sformatf("\n\t ---| channel  %h", channel), UVM_LOW)
-      if (!write && channel == DataChannel) begin
-        if (do_read_check) begin
-          `DV_CHECK_EQ(csr.get_mirrored_value(), item.d_data,
-                       $sformatf("reg name: %0s", csr.get_full_name()))
-        end
-        void'(csr.predict(.value(item.d_data), .kind(UVM_PREDICT_READ)));
-        `uvm_info(`gfn, $sformatf("\n\t ----| SAW READ - %s data %02h",csr.get_name(),  item.d_data), UVM_LOW)
-
-        case (csr.get_name())
-          "data_out0": begin
-           dut_item.data_in[0] =   item.d_data;
-          end
-          "data_out1": begin
-            dut_item.data_in[1] =   item.d_data;
-          end
-          "data_out2": begin
-            dut_item.data_in[2] =   item.d_data;
-          end
-          "data_out3": begin
-            dut_item.data_in[3] =   item.d_data;
-            `uvm_info(`gfn, $sformatf("\n\t ----| ADDING TO DUT FIFO"), UVM_LOW)
-            dut_fifo.put(dut_item);
-          end
-          
-        endcase      
-      end
-      
     end
+    
+
+    // process the csr req
+    // for write, update local variable and fifo at address phase
+    // for read, update predication at address phase and compare at data phase
+    
+
+    // On reads, if do_read_check, is set, then check mirrored_value against item.d_data
+    `uvm_info(`gfn, $sformatf("\n\t ---| channel  %h", channel), UVM_LOW)
+    if (!write && channel == DataChannel) begin
+      if (do_read_check) begin
+        `DV_CHECK_EQ(csr.get_mirrored_value(), item.d_data,
+                     $sformatf("reg name: %0s", csr.get_full_name()))
+      end
+      void'(csr.predict(.value(item.d_data), .kind(UVM_PREDICT_READ)));
+      `uvm_info(`gfn, $sformatf("\n\t ----| SAW READ - %s data %02h",csr.get_name(),  item.d_data), UVM_LOW)
+
+      case (csr.get_name())
+        "data_out0": begin
+          dut_item.data_in[0] =   item.d_data;
+        end
+        "data_out1": begin
+          dut_item.data_in[1] =   item.d_data;
+        end
+        "data_out2": begin
+          dut_item.data_in[2] =   item.d_data;
+        end
+        "data_out3": begin
+          dut_item.data_in[3] =   item.d_data;
+          `uvm_info(`gfn, $sformatf("\n\t ----| ADDING TO DUT FIFO"), UVM_LOW)
+          dut_fifo.put(dut_item);
+        end
+        
+      endcase      
+    end
+    
   endtask
 
 
