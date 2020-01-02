@@ -30,9 +30,6 @@ BUILD_OPTS  += +warn=SV-NFIVC
 # option below is required for $error / $fatal system calls
 BUILD_OPTS  += -assert svaext
 
-# Temporary fix to make GCC find aes.h
-BUILD_OPTS  += -CFLAGS "-I../../../../../model"
-
 # set standard run options
 RUN_OPTS    += -licqueue
 RUN_OPTS    += -ucli -do ${SIM_SETUP}
