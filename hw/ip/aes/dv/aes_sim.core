@@ -15,7 +15,6 @@ filesets:
   files_dv:
     depend:
       - lowrisc:dv:aes_test
-#      - lowrisc:dv:aes_model_dpi
     files:
       - tb/tb.sv
     file_type: systemVerilogSource

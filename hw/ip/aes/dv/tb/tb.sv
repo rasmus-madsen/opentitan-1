@@ -20,7 +20,7 @@ module tb;
   // interfaces
   clk_rst_if clk_rst_if(.clk(clk), .rst_n(rst_n));
   pins_if #(NUM_MAX_INTERRUPTS) intr_if(interrupts);
-  pins_if #(NUM_MAX_ALERTS) alerts_if(alerts);
+//  pins_if #(NUM_MAX_ALERTS) alerts_if(alerts);
   pins_if #(1) devmode_if(devmode);
   tl_if tl_if(.clk(clk), .rst_n(rst_n));
 
