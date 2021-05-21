@@ -11,7 +11,7 @@ class aes_alert_reset_vseq extends aes_base_vseq;
   aes_message_item my_message;
   status_t aes_status;
   bit  finished_all_msgs = 0;
-
+  rand bit choice;
   rand bit [$bits(aes_mode_e) -1 : 0] mal_error;
  // constraint mal_error_c { $countones(mal_error.mode) > 1; };
 
@@ -27,22 +27,43 @@ class aes_alert_reset_vseq extends aes_base_vseq;
     fork
       begin: isolation_fork
         fork
-          error: begin
+          error: begin          
             cfg.clk_rst_vif.wait_clks(cfg.inj_delay);
             if (cfg.error_types.mal_inject && (cfg.flip_rst == Flip_bits)) begin
-              randomize(mal_error)  with { $countones(mal_error) > 1; };
-              if (!uvm_hdl_check_path("tb.dut.u_aes_core.u_ctrl_reg_shadowed.committed_q")) begin
-                `uvm_fatal(`gfn, $sformatf("\n\t ----| PATH NOT FOUND"))
-              end else begin
-                $assertoff(0, "tb.dut.u_aes_core.AesModeValid");
-                $assertoff(0, "tb.dut.u_aes_core.u_aes_control.AesModeValid");
-                uvm_hdl_force("tb.dut.u_aes_core.u_ctrl_reg_shadowed.committed_q[6:1]", mal_error);
-                wait(!cfg.clk_rst_vif.rst_n);
-                uvm_hdl_release("tb.dut.u_aes_core.u_ctrl_reg_shadowed.committed_q[6:1]");
-                // turn assertions back on
-                $asserton(0, "tb.dut.u_aes_core.AesModeValid");
-                $asserton(0, "tb.dut.u_aes_core.u_aes_control.AesModeValid");
-              end
+              randomize(choice);
+              case (choice)
+                0: begin // flip bit in state reg
+                  randomize(mal_error)  with { $countones(mal_error) > 1; };
+                  if (!uvm_hdl_check_path("tb.dut.u_aes_core.u_ctrl_reg_shadowed.committed_q")) begin
+                    `uvm_fatal(`gfn, $sformatf("\n\t ----| PATH NOT FOUND"))
+                  end else begin
+                    $assertoff(0, "tb.dut.u_aes_core.AesModeValid");
+                    $assertoff(0, "tb.dut.u_aes_core.u_aes_control.AesModeValid");
+                    uvm_hdl_force("tb.dut.u_aes_core.u_ctrl_reg_shadowed.committed_q[6:1]", mal_error);
+                    `uvm_info(`gfn, $sformatf("\n ----| Forcing reg_shadowed.committed_q"), UVM_MEDIUM)
+                    wait(!cfg.clk_rst_vif.rst_n);
+                    uvm_hdl_release("tb.dut.u_aes_core.u_ctrl_reg_shadowed.committed_q[6:1]");
+                    // turn assertions back on
+                    $asserton(0, "tb.dut.u_aes_core.AesModeValid");
+                    $asserton(0, "tb.dut.u_aes_core.u_aes_control.AesModeValid");
+                  end
+                end
+                1: begin //change lc_escalate_en_i
+                  if (!uvm_hdl_check_path("tb.dut.lc_escalate_en_i")) begin
+                    `uvm_fatal(`gfn, $sformatf("\n\t ----| PATH NOT FOUND"))
+                  end else begin
+                    randomize(mal_error)  with { mal_error[3:0] != 4'b0101; };
+                    $assertoff(0,"tb.dut.u_prim_lc_sync.CheckTransients_A");
+                    $assertoff(0,"tb.dut.u_prim_lc_sync.CheckTransients0_A");
+                    uvm_hdl_force("tb.dut.lc_escalate_en_i", mal_error[3:0]);
+                    `uvm_info(`gfn, $sformatf("\n ----| Forcing lc_escalate_en_i"), UVM_MEDIUM)                    
+                    wait(!cfg.clk_rst_vif.rst_n);
+                    uvm_hdl_release("tb.dut.lc_escalate_en_i");
+                    $asserton(0,"tb.dut.u_prim_lc_sync.CheckTransients_A");
+                    $asserton(0,"tb.dut.u_prim_lc_sync.CheckTransients0_A");
+                  end
+                end
+              endcase // case (choice)
             end else if (cfg.error_types.reset && (cfg.flip_rst == Pull_reset)) begin
               // only do reset injection if we are not already
               // injecting other errors (which will pull reset anyway)
