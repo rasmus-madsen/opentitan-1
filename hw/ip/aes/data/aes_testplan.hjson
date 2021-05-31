@@ -123,5 +123,12 @@
       milestone: V2
       tests: []
     }
+    {
+      name: Clock crossing
+      desc: '''
+            Verify that the clock crossing works when the fast <-> slow relationship is reversed and for various clock ranges '''
+      milestone: V2
+      tests: []
+    }
   ]
 }

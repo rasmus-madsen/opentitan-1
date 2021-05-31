@@ -12,6 +12,8 @@ class aes_stress_vseq extends aes_base_vseq;
   task body();
     `uvm_info(`gfn, $sformatf("\n\n\t ----| STARTING AES MAIN SEQUENCE |----\n %s",
                               cfg.convert2string()), UVM_LOW)
+   // cfg.clk_rst_vif.set_period_ps(5000);
+   // cfg.edn_clk_rst_vif.set_period_ps(150000);
 
     // generate list of messages //
     generate_message_queue();

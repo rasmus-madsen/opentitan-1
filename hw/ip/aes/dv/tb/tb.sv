@@ -53,6 +53,7 @@ module tb;
   );
 
   initial begin
+  
     // drive clk and rst_n from clk_if
     clk_rst_if.set_active();
     uvm_config_db#(virtual clk_rst_if)::set(null, "*.env", "clk_rst_vif", clk_rst_if);
@@ -62,6 +63,7 @@ module tb;
     uvm_config_db#(virtual aes_cov_if)::set(null, "*.env", "aes_cov_if", dut.u_aes_cov_if );
 
     $timeformat(-12, 0, " ps", 12);
+
     run_test();
   end
 

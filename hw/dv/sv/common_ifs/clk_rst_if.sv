@@ -102,6 +102,7 @@ interface clk_rst_if #(
     clk_period_ps = period_ps;
     clk_freq_mhz  = 1000_000 / clk_period_ps;
     recompute     = 1'b1;
+    $display("setting frequency %d", period_ps);
   endfunction
 
   // set the duty cycle (1-99)
