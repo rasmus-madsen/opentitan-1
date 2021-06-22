@@ -27,6 +27,8 @@ class aes_nist_vectors_vseq extends aes_base_vseq;
   rand bit [2:0]       key_len;
 
   constraint c_key_len { key_len inside {3'b001,3'b010,3'b100}; }
+ 
+  `include "nist_vectors.sv"
 
   task body();
 
