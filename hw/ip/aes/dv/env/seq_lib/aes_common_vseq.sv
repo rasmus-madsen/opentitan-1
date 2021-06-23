@@ -25,6 +25,7 @@ class aes_common_vseq extends aes_base_vseq;
   // to ensure the shadow_reg_tests predict correct value, only write ctrl_shadowed when Idle
   virtual task shadow_reg_wr(dv_base_reg csr, uvm_reg_data_t wdata, output bit alert_triggered);
     bit [TL_DW-1:0] rdata;
+    `uvm_info("RMN", $sformatf("called_update_shadow_reg"), UVM_LOW)
     csr_rd(ral.status, rdata);
     if (get_field_val(ral.status.idle, rdata) == 1) begin
       super.shadow_reg_wr(csr, wdata, alert_triggered);

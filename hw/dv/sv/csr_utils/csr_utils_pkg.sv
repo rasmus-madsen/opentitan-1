@@ -182,6 +182,7 @@ package csr_utils_pkg;
                             input  uvm_reg_map  map = null,
                             input  bit          en_shadow_wr = 1);
     if (blocking) begin
+      `uvm_info("DEBUG", $sformatf("in CSR UPDATE csr %s, en shadow wr %b",csr.get_full_name(),  en_shadow_wr), UVM_LOW)
       csr_update_sub(csr, check, path, timeout_ns, map, en_shadow_wr);
     end else begin
       fork
@@ -206,6 +207,7 @@ package csr_utils_pkg;
 
         fork
           begin
+            `uvm_info("DEBUG", $sformatf("in SUB CSR UPDATE %s, en shadow wr %b",csr.get_full_name(), en_shadow_wr), UVM_LOW)
             increment_outstanding_access();
             csr_pre_write_sub(csr, en_shadow_wr);
             csr.update(.status(status), .path(path), .map(map), .prior(100));
@@ -242,9 +244,8 @@ package csr_utils_pkg;
                         input bit            en_shadow_wr = 1);
     if (backdoor) begin
       csr_poke(ptr, value, check, predict);
-    end else begin
+    end else begin     
       csr_field_t csr_or_fld = decode_csr_or_field(ptr);
-
       // if it's a field write, still do full CSR write and use mirrored value for the other fields
       if (csr_or_fld.field != null) begin
         // get full CSR value
@@ -282,6 +283,7 @@ package csr_utils_pkg;
         fork
           begin
             increment_outstanding_access();
+            `uvm_info("DEBUG", $sformatf("SUB_REG csr: %s value: %0h", csr.get_full_name(),value ), UVM_LOW)
             csr_pre_write_sub(csr, en_shadow_wr);
             csr.write(.status(status), .value(value), .path(path), .map(map), .prior(100));
             csr_post_write_sub(csr, en_shadow_wr);

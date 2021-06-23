@@ -144,6 +144,7 @@ class dv_base_reg extends uvm_reg;
 
   function void set_en_shadow_wr(bit val);
     // do not update en_shadow_wr if shadow register write is in process
+    `uvm_info("DEBUG", $sformatf("udating in base reg: %0b", val), UVM_LOW)
     if ((en_shadow_wr ^ val) && shadow_wr_staged) begin
       `uvm_info(`gfn,
           $sformatf("unable to %0s en_shadow_wr because register already completed first write",
@@ -231,6 +232,7 @@ class dv_base_reg extends uvm_reg;
                      input string            fname = "",
                      input int               lineno = 0);
     if (is_shadowed) atomic_shadow_wr.get(1);
+            `uvm_info("DEBUG", $sformatf("writing shadow en: %b, write_en: %0b ", is_shadowed, en_shadow_wr), UVM_LOW)      
     super.write(status, value, path, map, parent, prior, extension, fname, lineno);
     if (is_shadowed && en_shadow_wr) begin
       super.write(status, value, path, map, parent, prior, extension, fname, lineno);

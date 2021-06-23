@@ -97,6 +97,7 @@ class aes_base_vseq extends cip_base_vseq #(
 
 
   virtual task set_mode(bit [5:0] mode);
+    `uvm_info("DEBUG", $sformatf("\n RMN this should update mode to %6b \ from %6b", mode, ral.ctrl_shadowed.mode.get_mirrored_value()), UVM_LOW)
     if (ral.ctrl_shadowed.mode.get_mirrored_value() != mode) begin
       ral.ctrl_shadowed.mode.set(mode);
       csr_update(.csr(ral.ctrl_shadowed), .en_shadow_wr(1'b1), .blocking(1));
@@ -105,8 +106,10 @@ class aes_base_vseq extends cip_base_vseq #(
 
 
   virtual task set_key_len(bit [2:0] key_len);
+    `uvm_info("DEBUG", $sformatf("\n RMN this should update keylen to %3b \ from %3b", key_len, ral.ctrl_shadowed.key_len.get_mirrored_value()), UVM_LOW)
     if (ral.ctrl_shadowed.key_len.get_mirrored_value() != key_len) begin
       ral.ctrl_shadowed.key_len.set(key_len);
+      `uvm_info("DEBUG", $sformatf("UPDATED SHADOW VAL %3b",ral.ctrl_shadowed.key_len.get()), UVM_LOW)
       csr_update(.csr(ral.ctrl_shadowed), .en_shadow_wr(1'b1), .blocking(1));
     end
   endtask
