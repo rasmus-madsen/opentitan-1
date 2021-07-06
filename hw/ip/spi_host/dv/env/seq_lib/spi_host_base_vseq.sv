@@ -237,6 +237,8 @@ class spi_host_base_vseq extends cip_base_vseq #(
     cfg.clk_rst_core_vif.drive_rst_pin(0);
     super.apply_resets_concurrently(cfg.clk_rst_core_vif.clk_period_ps);
     cfg.clk_rst_core_vif.drive_rst_pin(1);
+  endtask // apply_resets_concurrently
+  
 
   // override wait_for_reset to to handle core_reset domain
   virtual task wait_for_reset(string reset_kind = "HARD",

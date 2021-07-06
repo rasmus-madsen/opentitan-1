@@ -13,6 +13,7 @@ module tb;
   import lc_ctrl_pkg::*;
 
   import spi_device_pkg::passthrough_req_t;
+  import spi_device_pkg::passthrough_rsp_t;
 
   // macro includes
   `include "uvm_macros.svh"
