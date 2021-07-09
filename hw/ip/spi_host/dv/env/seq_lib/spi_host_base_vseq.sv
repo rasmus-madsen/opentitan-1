@@ -128,17 +128,12 @@ class spi_host_base_vseq extends cip_base_vseq #(
     super.pre_start();
   endtask : pre_start
 
-  virtual task initialization();
-    wait(cfg.m_spi_agent_cfg.vif.rst_n);
-    `uvm_info(`gfn, "\n  base_vseq, out of reset", UVM_LOW)
-    spi_host_init();
-    `uvm_info(`gfn, "\n  base_vseq, initialization is completed", UVM_LOW)
-  endtask : initialization
 
   // setup basic spi_host features
   virtual task spi_host_init();
     bit [TL_DW-1:0] intr_state;
-
+    
+    wait(cfg.m_spi_agent_cfg.vif.rst_n);
     // program sw_reset for spi_host dut
     program_spi_host_sw_reset();
     // enable then clear interrupts
@@ -160,9 +155,10 @@ class spi_host_base_vseq extends cip_base_vseq #(
     // IMPORTANT: configopt regs must be programmed before command reg
     program_configopt_regs();
     program_control_reg();
+    program_csid_reg();
     wait_ready_for_command();
-    program_command_reg();
-    update_spi_agent_regs();
+  
+   // update_spi_agent_regs();
   endtask : program_spi_host_regs
 
   virtual task program_csid_reg();
@@ -192,6 +188,16 @@ class spi_host_base_vseq extends cip_base_vseq #(
       cfg.set_dv_base_reg_field_by_name(base_reg, "csnidle",  spi_host_regs.csnidle[i], i);
       cfg.set_dv_base_reg_field_by_name(base_reg, "clkdiv",   spi_host_regs.clkdiv[i], i);
       csr_update(base_reg);
+
+      // TODO TMP PRINT
+      `uvm_info("SPI_DBG", $sformatf("cpol[%d]: %0h",    i, spi_host_regs.cpol[i]   ), UVM_LOW)
+      `uvm_info("SPI_DBG", $sformatf("cpha[%d]: %0h",    i, spi_host_regs.cpha[i]   ), UVM_LOW)
+      `uvm_info("SPI_DBG", $sformatf("fullcyc[%d]: %0h", i, spi_host_regs.fullcyc[i]), UVM_LOW)
+      `uvm_info("SPI_DBG", $sformatf("csnlead[%d]: %0h", i, spi_host_regs.csnlead[i]), UVM_LOW)
+      `uvm_info("SPI_DBG", $sformatf("csntrail[%d]: %0h",i, spi_host_regs.csntrail[i]), UVM_LOW)
+      `uvm_info("SPI_DBG", $sformatf("csnidle[%d]: %0h", i, spi_host_regs.csnidle[i]), UVM_LOW)
+      `uvm_info("SPI_DBG", $sformatf("clkdiv[%d]: %0h",  i, spi_host_regs.clkdiv[i] ), UVM_LOW)
+      
     end
   endtask : program_configopt_regs
 
@@ -372,6 +378,12 @@ class spi_host_base_vseq extends cip_base_vseq #(
       join
     end
   endtask : do_phase_align_reset
+
+  virtual task write_spi_command(bit [31:0] data);
+    bit [TL_DBW-1:0] mask = {TL_DBW{1'b1}};
+    tl_access(.addr(ral.get_addr_from_offset(fifo_base_addr)), .write(1'b1), .data(data), .mask(mask), .blocking(1'b1));
+  endtask // write_spi_command
+
 
 
 endclass : spi_host_base_vseq

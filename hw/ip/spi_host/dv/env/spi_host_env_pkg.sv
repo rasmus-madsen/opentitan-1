@@ -54,7 +54,7 @@ package spi_host_env_pkg;
     rand bit [3:0]  csnidle[SPI_HOST_NUM_CS-1:0];
     rand bit [15:0] clkdiv[SPI_HOST_NUM_CS-1:0];
   } spi_host_configopts_t;
-
+  
   typedef struct {
     // csid register
     rand bit [31:0] csid;
@@ -76,6 +76,24 @@ package spi_host_env_pkg;
     rand bit        csaat;
     rand bit [8:0]  len;
   } spi_host_regs_t;
+
+  typedef struct packed {
+    bit          status;
+    bit          active;
+    bit          txfull;
+    bit          txempty;
+    bit          txstall;
+    bit          tx_wm;
+    bit          rxfull;
+    bit          rxempty;
+    bit          rxstall;
+    bit          byteorder;
+    bit          rsv_0;
+    bit          rx_wm;
+    bit [19:16]  rsv_1;
+    bit [15:8]   rx_qd;
+    bit [7:0]    tx_qd;
+  } spi_host_status_t;
 
   // alerts
   parameter uint NUM_ALERTS = 1;

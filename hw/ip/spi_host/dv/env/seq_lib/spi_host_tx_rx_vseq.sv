@@ -4,30 +4,41 @@ class spi_host_tx_rx_vseq extends spi_host_base_vseq;
 
   semaphore spi_host_atomic = new(1);
 
-  virtual task body();
-    initialization();
+  spi_host_status_t status;
 
-    for (int trans = 0; trans < 2; trans++) begin
-      `uvm_info(`gfn, $sformatf("\n\n==> rxtx_vseq, start trans %0d/%0d",
-          trans + 1, num_trans), UVM_LOW)
-      `DV_CHECK_RANDOMIZE_FATAL(this)
-      program_spi_host_regs();
-      start_spi_host_trans();
-    end
+  virtual task body();
+   // spi_host_init();
+    wait_ready_for_command();
+    start_spi_host_trans();
+
   endtask : body
 
   virtual task start_spi_host_trans();
-    fork
-      start_spi_agent_seq();
-      send_tx_trans();
-      send_rx_trans();
-    join
+    spi_host_regs.csaat = 0;
+    spi_host_regs.csid = 0;
+    //fork
+    `uvm_info("SPI_DBG", $sformatf("REACHED!!!!"), UVM_LOW)
+    //start_spi_agent_seq();
+    `uvm_info("SPI_DBG", $sformatf("REACHED 1!!!!"), UVM_LOW)
+    program_spi_host_regs();
+    `uvm_info("SPI_DBG", $sformatf("REACHED 2!!!!"), UVM_LOW)    
+    `uvm_info("SPI_DBG", $sformatf("REACHED 3!!!!"), UVM_LOW)
+    wait_ready_for_command();
+    wait_ready_for_command();
+    csr_rd(.ptr(ral.status), .value(status));
+    `uvm_info(`gfn, $sformatf("status is %b", status.active), UVM_LOW)
+    write_spi_command(32'h00112233);
+      program_command_reg();
+    `uvm_info("SPI_DBG", $sformatf("REACHED END!!!!"), UVM_LOW)
+    //      send_tx_trans();
+    //      send_rx_trans();
+    // join
     // wait for all accesses to complete
-    wait_no_outstanding_access();
-    `uvm_info(`gfn, "\n  rxtx_vseq, wait_no_outstanding_access is done", UVM_LOW)
+//    wait_no_outstanding_access();
+
     // read out status/intr_state CSRs to check
-    check_status_and_clear_intrs();
-    `uvm_info(`gfn, "\n  rxtx_vseq, check_status_and_clear_intrs is done", UVM_LOW)
+//    check_status_and_clear_intrs();
+
   endtask : start_spi_host_trans
 
   // sending tx requests to the agent
@@ -107,6 +118,8 @@ class spi_host_tx_rx_vseq extends spi_host_base_vseq;
   virtual task start_spi_agent_seq();
     spi_device_seq m_spi_device_seq;
 
+    `uvm_info("SPI_DBG", $sformatf("In agent task"), UVM_LOW)    
+
     `uvm_create_on(m_spi_device_seq, p_sequencer.spi_sequencer_h)
     `uvm_info(`gfn, "\n  rxtx_vseq: CREATED m_spi_device_seq", UVM_LOW)
     m_spi_device_seq.item_type = SpiTransNormal;
@@ -114,7 +127,9 @@ class spi_host_tx_rx_vseq extends spi_host_base_vseq;
     m_spi_device_seq.direction = spi_host_regs.direction;
     m_spi_device_seq.spi_mode  = spi_host_regs.speed;
     `uvm_info(`gfn, "\n  rxtx_vseq: SEND m_spi_device_seq", UVM_LOW)
+    `uvm_info("SPI_DBG", $sformatf("mid agent task"), UVM_LOW)        
     `uvm_send(m_spi_device_seq);
+    `uvm_info("SPI_DBG", $sformatf("end agent task"), UVM_LOW)        
   endtask : start_spi_agent_seq
 
 endclass : spi_host_tx_rx_vseq
