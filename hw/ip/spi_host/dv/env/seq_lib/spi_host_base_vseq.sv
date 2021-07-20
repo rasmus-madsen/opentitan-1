@@ -59,10 +59,6 @@ class spi_host_base_vseq extends cip_base_vseq #(
         [16:31] :/ 2,
         [32:cfg.seq_cfg.host_spi_max_rxwm] :/ 1
       };
-      spi_host_regs.passthru dist {
-        1'b0 :/ 1,
-        1'b1 :/ 0   // TODO: currently disable passthru mode until specification is updated
-      };
     // configopts regs
       foreach (spi_host_regs.cpol[i]) {
         spi_host_regs.cpol[i] dist {
@@ -169,7 +165,6 @@ class spi_host_base_vseq extends cip_base_vseq #(
   virtual task program_control_reg();
     ral.control.tx_watermark.set(spi_host_regs.tx_watermark);
     ral.control.rx_watermark.set(spi_host_regs.rx_watermark);
-    ral.control.passthru.set(spi_host_regs.passthru);
     // activate spi_host dut
     ral.control.spien.set(1'b1);
     csr_update(ral.control);

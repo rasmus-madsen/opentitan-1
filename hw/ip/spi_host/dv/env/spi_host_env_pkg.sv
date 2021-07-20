@@ -61,7 +61,6 @@ package spi_host_env_pkg;
     // control register fields
     rand bit [8:0]  tx_watermark;
     rand bit [6:0]  rx_watermark;
-    rand bit        passthru;
     // configopts register fields
     rand bit        cpol[SPI_HOST_NUM_CS-1:0];
     rand bit        cpha[SPI_HOST_NUM_CS-1:0];

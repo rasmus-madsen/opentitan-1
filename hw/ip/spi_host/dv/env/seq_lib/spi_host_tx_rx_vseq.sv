@@ -28,6 +28,9 @@ class spi_host_tx_rx_vseq extends spi_host_base_vseq;
     csr_rd(.ptr(ral.status), .value(status));
     `uvm_info(`gfn, $sformatf("status is %b", status.active), UVM_LOW)
     write_spi_command(32'h00112233);
+    write_spi_command(32'h44556677);
+    write_spi_command(32'h8899aabb);
+    write_spi_command(32'hccddeeff);
       program_command_reg();
     `uvm_info("SPI_DBG", $sformatf("REACHED END!!!!"), UVM_LOW)
     //      send_tx_trans();
